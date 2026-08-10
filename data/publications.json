@@ -1,0 +1,56 @@
+[
+  {
+    "title": "PhysRVG: Physics-Aware Unified Reinforcement Learning for Video Generative Models",
+    "authors": "Qiyuan Zhang, Biao Gong, Shuai Tan, Zheng Zhang, Yujun Shen, Xing Zhu, Yuyuan Li, Kelu Yao, Chunhua Shen, Changqing Zou",
+    "venue": "ECCV 2026",
+    "year": 2026,
+    "image": "/assets/publications/physrvg.gif",
+    "links": [
+      { "label": "arXiv", "href": "https://arxiv.org/abs/2601.11087" },
+      { "label": "Webpage", "href": "https://lucaria-academy.github.io/PhysRVG/" },
+      { "label": "Code", "href": "https://github.com/ant-research/PhysRVG" }
+    ]
+  },
+  {
+    "title": "CoDance: An Unbind-Rebind Paradigm for Robust Multi-Subject Animation",
+    "authors": "Shuai Tan, Biao Gong, Ke Ma, Yutong Feng, Qiyuan Zhang, Yan Wang, Yujun Shen, Hengshuang Zhao",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "image": "/assets/publications/codance.gif",
+    "links": [
+      { "label": "arXiv", "href": "https://arxiv.org/abs/2601.11096" },
+      { "label": "Webpage", "href": "https://lucaria-academy.github.io/CoDance/" },
+      { "label": "Code", "href": "https://github.com/Lucaria-Academy/CoDance" }
+    ]
+  },
+  {
+    "title": "A Self-Supervised Motion Representation for Portrait Video Generation",
+    "authors": "Qiyuan Zhang, Chenyu Wu, Wenzhang Sun, Huaize Liu, Donglin Di, Wei Chen, Changqing Zou",
+    "venue": "ACM MM 2026",
+    "year": 2026,
+    "image": "/assets/publications/semo.gif",
+    "links": [
+      { "label": "arXiv", "href": "https://arxiv.org/abs/2503.10096" }
+    ]
+  },
+  {
+    "title": "Hi-VAE: Efficient Video Autoencoding with Global and Detailed Motion",
+    "authors": "Huaize Liu, Wenzhang Sun, Qiyuan Zhang, Donglin Di, Biao Gong, Hao Li, Chen Wei, Changqing Zou",
+    "venue": "arXiv preprint",
+    "year": 2025,
+    "image": "/assets/publications/hivae.png",
+    "links": [
+      { "label": "arXiv", "href": "https://arxiv.org/abs/2506.07136" }
+    ]
+  },
+  {
+    "title": "UniAvatar: Taming Lifelike Audio-Driven Talking Head Generation with Comprehensive Motion and Lighting Control",
+    "authors": "Wenzhang Sun, Xiang Li, Donglin Di, Zhuding Liang, Qiyuan Zhang, Hao Li, Wei Chen, Jianxun Cui",
+    "venue": "arXiv preprint",
+    "year": 2024,
+    "image": "/assets/publications/uniavatar.png",
+    "links": [
+      { "label": "arXiv", "href": "https://arxiv.org/abs/2412.19860" }
+    ]
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "title": "Qiyuan Zhang",
+  "brandName": "张启元",
+  "brandLabel": "Blog",
+  "author": "Qiyuan Zhang",
+  "authorAliases": ["Qiyuan Zhang", "Q. Zhang"],
+  "description": "Personal homepage of Qiyuan Zhang — research notes, publications and projects.",
+  "https://hapypanda.github.iobaseURL": "https://zhangqiyuan99.github.io",
+  "email": "948126099@qq.com",
+  "lang": "zh-CN",
+  "homeBlogCount": 3,
+  "homePublicationCount": 3,
+  "nav": [],
+  "sections": [
+    { "id": "blog",         "name": "博客" },
+    { "id": "projects",     "name": "项目" },
+    { "id": "publications", "name": "论文" }
+  ],
+  "social": [
+    { "label": "Email", "href": "mailto:948126099@qq.com" },
+    { "label": "GitHub", "href": "https://github.com/HapyPanda" },
+    { "label": "Scholar", "href": "https://scholar.google.com/citations?user=VbLeMXkAAAAJ&hl=zh-CN" }
+  ],
+  "experience": [
+    { "period": "2025–至今", "role": "Ant Group · 实习" },
+    { "period": "2022–至今", "role": "ZJU · Ph.D." },
+    { "period": "2017–2021", "role": "ZJU · B.Eng." }
+  ]
+}

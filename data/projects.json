@@ -1,0 +1,23 @@
+[
+  {
+    "name": "SeMo",
+    "year": 2026,
+    "blurb": "音频驱动的语义运动生成流水线：MAE 预训练 + audio-to-motion 扩散解码。",
+    "href": "https://github.com/zhangqiyuan99/SeMo",
+    "tags": ["motion", "audio", "diffusion"]
+  },
+  {
+    "name": "paper-hunter",
+    "year": 2025,
+    "blurb": "按研究兴趣自动抓取 arXiv 新论文并整理成日报的小工具。",
+    "href": "https://github.com/zhangqiyuan99",
+    "tags": ["tooling", "arxiv"]
+  },
+  {
+    "name": "personal-site",
+    "year": 2025,
+    "blurb": "这个站点本身：约 600 行的静态生成器，零前端框架，构建即成品。",
+    "href": "https://github.com/zhangqiyuan99",
+    "tags": ["node", "static-site"]
+  }
+]

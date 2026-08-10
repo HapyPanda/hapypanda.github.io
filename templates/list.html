@@ -1,0 +1,37 @@
+<div class="wrap">
+  <header class="list-header">
+    <h1 class="section-title">{{ listTitle }}</h1>
+    <p class="list-subtitle">{{ listSubtitle }}</p>
+  </header>
+
+  <div class="timeline">
+    {{#each groups}}
+    <section class="year-group">
+      <h2 class="year-label">{{ this.year }}</h2>
+      <ul class="post-list">
+        {{#each this.posts}}
+        <li class="tick">
+          <article class="card post-card content-card" data-href="{{ this.url }}">
+            <div class="media-tile media-blog">
+              {{#if this.image}}<img src="{{ this.image }}" alt="{{ this.imageAlt }}" loading="lazy">{{/if}}
+              {{#unless this.image}}<span aria-hidden="true">BLOG</span>{{/unless}}
+            </div>
+            <div class="content-card-body">
+              <h3 class="post-card-title"><a href="{{ this.url }}">{{ this.title }}</a>{{#if this.draft}} <span class="draft-flag">draft</span>{{/if}}</h3>
+              <p class="post-card-meta">
+                <time datetime="{{ this.dateISO }}">{{ this.dateISO }}</time>
+                <span class="dot">·</span><span>{{ this.readingTime }} min</span>
+              </p>
+              <p class="post-card-summary">{{ this.summary }}</p>
+              <p class="tag-row">{{#each this.tags}}<a class="tag" href="{{ this.url }}">{{ this.name }}</a>{{/each}}</p>
+            </div>
+          </article>
+        </li>
+        {{/each}}
+      </ul>
+    </section>
+    {{/each}}
+  </div>
+
+  {{#unless groups}}<p class="empty">这里还没有文章。</p>{{/unless}}
+</div>

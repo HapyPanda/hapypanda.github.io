@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ pageTitle }}</title>
+<meta name="description" content="{{ metaDescription }}">
+<link rel="canonical" href="{{ canonicalAbs }}">
+<meta property="og:title" content="{{ pageTitle }}">
+<meta property="og:description" content="{{ metaDescription }}">
+<meta property="og:url" content="{{ canonicalAbs }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site.title }}">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="/rss.xml">
+<link rel="stylesheet" href="/css/style.css?v={{ assetVersion }}">
+{{#if math}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+{{/if}}
+{{#if isPost}}
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+{{/if}}
+<script defer src="/js/main.js?v={{ assetVersion }}"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+
+<div class="shell{{#if isHome}} shell-home{{/if}}{{#if isPost}} shell-post{{/if}}">
+
+  <aside class="rail">
+    {{#if isPost}}
+    <a class="rail-brand" href="/">首页</a>
+    {{#if toc}}
+    <div class="rail-toc">
+      <p class="rail-toc-label">目录</p>
+      <nav aria-label="文章目录">
+        <ol>
+          {{#each toc}}
+          <li><a href="#{{ this.id }}">{{ this.text }}</a>
+            {{#if this.children}}
+            <ol>{{#each this.children}}<li><a href="#{{ this.id }}">{{ this.text }}</a></li>{{/each}}</ol>
+            {{/if}}
+          </li>
+          {{/each}}
+        </ol>
+      </nav>
+    </div>
+    {{/if}}
+    {{/if}}
+    {{#unless isPost}}
+    {{#if isHome}}
+    <a class="rail-brand" href="/"><span class="rail-brand-name">{{ site.brandName }}</span><span class="rail-brand-label">{{ site.brandLabel }}</span></a>
+    <section class="rail-experience" aria-label="经历">
+      <ol class="rail-experience-list">
+        {{#each site.experience}}
+        <li class="rail-experience-item">
+          <time>{{ this.period }}</time>
+          <span>{{ this.role }}</span>
+        </li>
+        {{/each}}
+      </ol>
+    </section>
+    {{/if}}
+    {{#unless isHome}}
+    <a class="rail-brand" href="/">首页</a>
+    {{/unless}}
+    {{#if isHome}}
+    <div class="rail-social" aria-label="联系方式">
+      {{#each site.social}}<a href="{{ this.href }}">{{ this.label }}</a>{{/each}}
+    </div>
+    {{/if}}
+    <nav class="rail-nav" aria-label="主导航">
+      {{#if isHome}}
+      {{#each site.sections}}
+      <a class="rail-link" href="#{{ this.id }}">{{ this.name }}</a>
+      {{/each}}
+      {{/if}}
+      {{#each nav}}
+      <a class="rail-link rail-page" href="{{ this.href }}"{{#if this.active}} aria-current="page"{{/if}}>{{ this.label }}</a>
+      {{/each}}
+    </nav>
+    {{/unless}}
+  </aside>
+
+  <main id="main">
+{{{ body }}}
+  </main>
+
+</div>
+</body>
+</html>

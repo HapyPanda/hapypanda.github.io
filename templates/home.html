@@ -1,0 +1,116 @@
+<div class="wrap">
+
+  <section class="block home-blog" aria-labelledby="blog">
+    <div class="home-blog-head">
+      <div class="section-head-wrap">
+        <h2 class="section-title" id="blog" tabindex="0"><span class="section-name">{{ sec.blog.name }}</span></h2>
+        <aside class="section-poster poster-blog" aria-label="全部博客">
+          <div class="poster-masthead"><span>BLOG INDEX</span><span>NEW → OLD</span></div>
+          <ol class="poster-list">
+            {{#each allPosts}}
+            <li class="poster-item{{#if @first}} is-latest{{/if}}">
+              <a href="{{ this.url }}"><time datetime="{{ this.dateISO }}">{{ this.dateISO }}</time><span>{{ this.title }}</span></a>
+            </li>
+            {{/each}}
+          </ol>
+        </aside>
+      </div>
+      <div class="blog-yuanbao-stage">
+        <div class="yuanbao-track" aria-hidden="true">
+          <div class="yuanbao-pet" data-asset-root="/img/yuanbao">
+            <img class="yuanbao-frame" src="/img/yuanbao/walk-left-00.png" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="timeline timeline-flush">
+      <ul class="post-list">
+        {{#each posts}}
+        <li class="tick">
+          <article class="card post-card content-card" data-href="{{ this.url }}">
+            <div class="media-tile media-blog">
+              {{#if this.image}}<img src="{{ this.image }}" alt="{{ this.imageAlt }}" loading="lazy">{{/if}}
+              {{#unless this.image}}<span aria-hidden="true">BLOG</span>{{/unless}}
+            </div>
+            <div class="content-card-body">
+              <h3 class="post-card-title"><a href="{{ this.url }}">{{ this.title }}</a>{{#if this.draft}} <span class="draft-flag">draft</span>{{/if}}</h3>
+              <p class="post-card-meta">
+                <time datetime="{{ this.dateISO }}">{{ this.dateISO }}</time>
+                <span class="dot">·</span><span>{{ this.readingTime }} min</span>
+              </p>
+              <p class="post-card-summary">{{ this.summary }}</p>
+              <p class="tag-row">{{#each this.tags}}<a class="tag" href="{{ this.url }}">{{ this.name }}</a>{{/each}}</p>
+            </div>
+          </article>
+        </li>
+        {{/each}}
+      </ul>
+    </div>
+    <p class="more-row"><a class="more-link" href="/blog/">全部</a></p>
+  </section>
+
+  <section class="block" aria-labelledby="projects">
+    <div class="section-head-wrap">
+      <h2 class="section-title" id="projects" tabindex="0"><span class="section-name">{{ sec.projects.name }}</span></h2>
+      <aside class="section-poster poster-projects" aria-label="全部项目">
+        <div class="poster-masthead"><span>PROJECT INDEX</span><span>SELECTED WORK</span></div>
+        <ol class="poster-list">
+          {{#each projects}}
+          <li class="poster-item"><a href="{{ this.href }}"><time>{{ this.year }}</time><span>{{ this.name }}</span></a></li>
+          {{/each}}
+        </ol>
+      </aside>
+    </div>
+    <div class="project-grid">
+      {{#each projects}}
+      <article class="card project content-card">
+        <div class="media-tile media-project">
+          {{#if this.image}}<img src="{{ this.image }}" alt="{{ this.name }}" loading="lazy">{{/if}}
+          {{#unless this.image}}<span aria-hidden="true">PROJECT</span>{{/unless}}
+        </div>
+        <div class="content-card-body">
+          <h3 class="project-name"><a href="{{ this.href }}">{{ this.name }}</a></h3>
+          <p class="project-blurb">{{ this.blurb }}</p>
+          <p class="tag-row">{{#each this.tags}}<span class="tag">{{ this }}</span>{{/each}}</p>
+        </div>
+      </article>
+      {{/each}}
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="publications">
+    <div class="section-head-wrap">
+      <h2 class="section-title" id="publications" tabindex="0"><span class="section-name">{{ sec.publications.name }}</span></h2>
+      <aside class="section-poster poster-publications" aria-label="全部论文">
+        <div class="poster-masthead"><span>PAPER INDEX</span><span>NEW → OLD</span></div>
+        <ol class="poster-list">
+          {{#each publications}}
+          <li class="poster-item"><a href="{{ this.primaryHref }}"><time>{{ this.year }}</time><span>{{ this.title }}</span></a></li>
+          {{/each}}
+        </ol>
+      </aside>
+    </div>
+    <ul class="pub-list">
+      {{#each publications}}
+      <li class="card pub content-card">
+        <div class="media-tile media-paper">
+          {{#if this.video}}<video src="{{ this.video }}"{{#if this.poster}} poster="{{ this.poster }}"{{/if}} aria-label="{{ this.title }}" autoplay muted loop playsinline preload="metadata"></video>{{/if}}
+          {{#unless this.video}}
+          {{#if this.image}}<img src="{{ this.image }}" alt="{{ this.title }}" loading="lazy">{{/if}}
+          {{/unless}}
+          {{#unless this.video}}
+          {{#unless this.image}}<span aria-hidden="true">PAPER</span>{{/unless}}
+          {{/unless}}
+        </div>
+        <div class="pub-body content-card-body">
+          <h3 class="pub-title">{{ this.title }}</h3>
+          <p class="pub-authors">{{{ this.authorsHtml }}}</p>
+          <p class="pub-venue">{{ this.venue }}</p>
+          <p class="pub-links">{{#each this.links}}<a href="{{ this.href }}">{{ this.label }}</a>{{/each}}</p>
+        </div>
+      </li>
+      {{/each}}
+    </ul>
+  </section>
+
+</div>
