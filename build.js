@@ -22,6 +22,9 @@ const p = (...s) => path.join(ROOT, ...s);
 const ARGS = new Set(process.argv.slice(2));
 const INCLUDE_DRAFTS = ARGS.has('--drafts');
 const WATCH = ARGS.has('--watch');
+const PLACEHOLDER_IMAGE = '/assets/blog/generic-torn-paper-placeholder.png';
+const HOME_BLOG_LAYOUT = ['metro-tile--hero', 'metro-tile--square', 'metro-tile--medium', 'metro-tile--medium', 'metro-tile--medium'];
+const HOME_PROJECT_LAYOUT = ['metro-tile--project-a', 'metro-tile--project-b', 'metro-tile--project-c'];
 
 const C = {
   dim: (s) => `\x1b[2m${s}\x1b[0m`,
@@ -130,14 +133,15 @@ function loadPosts() {
     const isDraft = meta.draft === true;
     const rendered = renderMarkdown(body);
 
+    const sourceImage = meta.image ? String(meta.image) : PLACEHOLDER_IMAGE;
     const post = {
       slug,
       url: `/posts/${slug}/`,
       file: where,
       title: String(meta.title),
       summary: String(meta.summary),
-      image: meta.image ? versionLocalAsset(String(meta.image)) : '',
-      imageAlt: meta.imageAlt ? String(meta.imageAlt) : String(meta.title),
+      image: versionLocalAsset(sourceImage),
+      imageAlt: meta.imageAlt ? String(meta.imageAlt) : `撕纸拼贴占位封面：${String(meta.title)}`,
       date: date.toISOString(),
       dateISO: iso(date),
       year: date.getUTCFullYear(),
@@ -179,11 +183,12 @@ function build() {
     authorsHtml: highlightAuthor(pub.authors, site.authorAliases),
     primaryHref: pub.links?.[0]?.href || '#publications',
   }));
-  const projects = readJson('data/projects.json').map((project) => ({
+  const projects = readJson('data/projects.json').map((project, index) => ({
     ...project,
-    image: versionLocalAsset(project.image),
+    image: versionLocalAsset(project.image || PLACEHOLDER_IMAGE),
     video: versionLocalAsset(project.video),
     poster: versionLocalAsset(project.poster),
+    homeTileClass: HOME_PROJECT_LAYOUT[index % HOME_PROJECT_LAYOUT.length],
   }));
 
   const all = loadPosts();
@@ -216,9 +221,13 @@ function build() {
     sec: Object.fromEntries((site.sections || []).map((s) => [s.id, s])),
     publications: publications.slice(0, site.homePublicationCount || publications.length),
     projects,
-    posts: posts.slice(0, site.homeBlogCount || 5),
+    posts: posts.slice(0, site.homeBlogCount || 5).map((post, index) => ({
+      ...post,
+      homeTileClass: HOME_BLOG_LAYOUT[index % HOME_BLOG_LAYOUT.length],
+    })),
     allPosts: posts,
     morePosts: posts.length > (site.homeBlogCount || 5),
+    experience: [...(site.experience || [])].reverse(),
   }, {
     pageTitle: site.title,
     metaDescription: site.description,

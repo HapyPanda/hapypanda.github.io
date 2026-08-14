@@ -8,7 +8,7 @@
   "baseURL": "https://hapypanda.github.io",
   "email": "948126099@qq.com",
   "lang": "zh-CN",
-  "homeBlogCount": 3,
+  "homeBlogCount": 5,
   "homePublicationCount": 3,
   "nav": [],
   "sections": [
@@ -17,7 +17,7 @@
     { "id": "publications", "name": "论文" }
   ],
   "social": [
-    { "label": "Email", "href": "mailto:948126099@qq.com" },
+    { "label": "Mail", "href": "mailto:948126099@qq.com" },
     { "label": "GitHub", "href": "https://github.com/HapyPanda" },
     { "label": "Scholar", "href": "https://scholar.google.com/citations?user=VbLeMXkAAAAJ&hl=zh-CN" }
   ],

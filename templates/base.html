@@ -27,7 +27,7 @@
 {{/if}}
 <script defer src="/js/main.js?v={{ assetVersion }}"></script>
 </head>
-<body>
+<body{{#if isHome}} class="home-page"{{/if}}>
 <a class="skip-link" href="#main">跳到正文</a>
 
 <div class="shell{{#if isHome}} shell-home{{/if}}{{#if isPost}} shell-post{{/if}}">

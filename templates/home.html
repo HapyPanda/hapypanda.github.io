@@ -1,94 +1,72 @@
 <div class="wrap">
 
-  <section class="block home-blog" aria-labelledby="blog">
-    <div class="home-blog-head">
-      <div class="section-head-wrap">
-        <h2 class="section-title" id="blog" tabindex="0"><span class="section-name">{{ sec.blog.name }}</span></h2>
-        <aside class="section-poster poster-blog" aria-label="全部博客">
-          <div class="poster-masthead"><span>BLOG INDEX</span><span>NEW → OLD</span></div>
-          <ol class="poster-list">
-            {{#each allPosts}}
-            <li class="poster-item{{#if @first}} is-latest{{/if}}">
-              <a href="{{ this.url }}"><time datetime="{{ this.dateISO }}">{{ this.dateISO }}</time><span>{{ this.title }}</span></a>
-            </li>
-            {{/each}}
-          </ol>
-        </aside>
-      </div>
-      <div class="blog-yuanbao-stage">
-        <div class="yuanbao-track" aria-hidden="true">
-          <div class="yuanbao-pet" data-asset-root="/img/yuanbao">
-            <img class="yuanbao-frame" src="/img/yuanbao/walk-left-00.png" alt="">
-          </div>
+  <header class="home-hero">
+    <div class="home-hero-copy">
+      <h1 class="home-title">Happy<span>Panda</span>'s Blog</h1>
+      <p class="home-tagline">你好，我是张启元，欢迎来到我的Blog 👏</p>
+      <nav class="home-social" aria-label="联系方式">
+        {{#each site.social}}<a href="{{ this.href }}">{{ this.label }}</a>{{/each}}
+        <span>WeChat</span>
+      </nav>
+    </div>
+    <aside class="home-experience" aria-label="个人经历">
+      <ol class="home-experience-list">
+        {{#each experience}}
+        <li><time>{{ this.period }}</time><span>{{ this.role }}</span></li>
+        {{/each}}
+      </ol>
+      <div class="home-pet-track" aria-hidden="true">
+        <div class="yuanbao-pet home-pet" data-asset-root="/img/yuanbao" data-stationary="true">
+          <img class="yuanbao-frame" src="/img/yuanbao/walk-left-00.png" alt="">
         </div>
       </div>
+    </aside>
+  </header>
+
+  <section class="block metro-section" aria-labelledby="blog">
+    <div class="metro-section-head">
+      <h2 class="metro-section-title" id="blog">{{ sec.blog.name }} <small>01 / NOTES</small></h2>
     </div>
-    <div class="timeline timeline-flush">
-      <ul class="post-list">
-        {{#each posts}}
-        <li class="tick">
-          <article class="card post-card content-card" data-href="{{ this.url }}">
-            <div class="media-tile media-blog">
-              {{#if this.image}}<img src="{{ this.image }}" alt="{{ this.imageAlt }}" loading="lazy">{{/if}}
-              {{#unless this.image}}<span aria-hidden="true">BLOG</span>{{/unless}}
-            </div>
-            <div class="content-card-body">
-              <h3 class="post-card-title"><a href="{{ this.url }}">{{ this.title }}</a>{{#if this.draft}} <span class="draft-flag">draft</span>{{/if}}</h3>
-              <p class="post-card-meta">
-                <time datetime="{{ this.dateISO }}">{{ this.dateISO }}</time>
-                <span class="dot">·</span><span>{{ this.readingTime }} min</span>
-              </p>
-              <p class="post-card-summary">{{ this.summary }}</p>
-              <p class="tag-row">{{#each this.tags}}<a class="tag" href="{{ this.url }}">{{ this.name }}</a>{{/each}}</p>
-            </div>
-          </article>
-        </li>
-        {{/each}}
-      </ul>
+    <div class="metro-grid metro-blog-grid">
+      {{#each posts}}
+      <a class="metro-tile {{ this.homeTileClass }}" href="{{ this.url }}" aria-label="打开文章：{{ this.title }}">
+        <img class="metro-tile-media" src="{{ this.image }}" alt="{{ this.imageAlt }}" loading="lazy">
+        <span class="metro-tile-shade"></span>
+        <strong class="metro-cover-title">{{ this.title }}</strong>
+        <span class="metro-glass">
+          <time class="metro-glass-date" datetime="{{ this.dateISO }}">{{ this.dateISO }}</time>
+          <strong class="metro-glass-title">{{ this.title }}</strong>
+          <span class="metro-glass-copy">{{ this.summary }}</span>
+        </span>
+      </a>
+      {{/each}}
     </div>
-    <p class="more-row"><a class="more-link" href="/blog/">全部</a></p>
+    <p class="metro-all"><a href="/blog/">全部</a></p>
   </section>
 
-  <section class="block" aria-labelledby="projects">
-    <div class="section-head-wrap">
-      <h2 class="section-title" id="projects" tabindex="0"><span class="section-name">{{ sec.projects.name }}</span></h2>
-      <aside class="section-poster poster-projects" aria-label="全部项目">
-        <div class="poster-masthead"><span>PROJECT INDEX</span><span>SELECTED WORK</span></div>
-        <ol class="poster-list">
-          {{#each projects}}
-          <li class="poster-item"><a href="{{ this.href }}"><time>{{ this.year }}</time><span>{{ this.name }}</span></a></li>
-          {{/each}}
-        </ol>
-      </aside>
+  <section class="block metro-section" aria-labelledby="projects">
+    <div class="metro-section-head">
+      <h2 class="metro-section-title" id="projects">{{ sec.projects.name }} <small>02 / BUILDS</small></h2>
     </div>
-    <div class="project-grid">
+    <div class="metro-grid metro-project-grid">
       {{#each projects}}
-      <article class="card project content-card">
-        <div class="media-tile media-project">
-          {{#if this.image}}<img src="{{ this.image }}" alt="{{ this.name }}" loading="lazy">{{/if}}
-          {{#unless this.image}}<span aria-hidden="true">PROJECT</span>{{/unless}}
-        </div>
-        <div class="content-card-body">
-          <h3 class="project-name"><a href="{{ this.href }}">{{ this.name }}</a></h3>
-          <p class="project-blurb">{{ this.blurb }}</p>
-          <p class="tag-row">{{#each this.tags}}<span class="tag">{{ this }}</span>{{/each}}</p>
-        </div>
-      </article>
+      <a class="metro-tile {{ this.homeTileClass }}" href="{{ this.href }}" aria-label="打开项目：{{ this.name }}">
+        <img class="metro-tile-media" src="{{ this.image }}" alt="{{ this.name }}" loading="lazy">
+        <span class="metro-tile-shade"></span>
+        <strong class="metro-cover-title">{{ this.name }}</strong>
+        <span class="metro-glass">
+          <time class="metro-glass-date" datetime="{{ this.year }}">{{ this.year }}</time>
+          <strong class="metro-glass-title">{{ this.name }}</strong>
+          <span class="metro-glass-copy">{{ this.blurb }}</span>
+        </span>
+      </a>
       {{/each}}
     </div>
   </section>
 
-  <section class="block" aria-labelledby="publications">
-    <div class="section-head-wrap">
-      <h2 class="section-title" id="publications" tabindex="0"><span class="section-name">{{ sec.publications.name }}</span></h2>
-      <aside class="section-poster poster-publications" aria-label="全部论文">
-        <div class="poster-masthead"><span>PAPER INDEX</span><span>NEW → OLD</span></div>
-        <ol class="poster-list">
-          {{#each publications}}
-          <li class="poster-item"><a href="{{ this.primaryHref }}"><time>{{ this.year }}</time><span>{{ this.title }}</span></a></li>
-          {{/each}}
-        </ol>
-      </aside>
+  <section class="block legacy-publications" aria-labelledby="publications">
+    <div class="metro-section-head">
+      <h2 class="metro-section-title" id="publications">{{ sec.publications.name }} <small>03 / PAPERS</small></h2>
     </div>
     <ul class="pub-list">
       {{#each publications}}

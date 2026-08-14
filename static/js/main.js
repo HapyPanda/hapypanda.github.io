@@ -69,6 +69,7 @@
     const image = pet.querySelector('.yuanbao-frame');
     const track = pet.parentElement;
     const root = pet.dataset.assetRoot;
+    const stationary = pet.dataset.stationary === 'true';
     if (!image || !track || !root) return;
 
     const paths = {
@@ -97,7 +98,7 @@
     if (reducedMotion.matches) {
       const { left } = positions();
       image.src = paths.sleep[5];
-      pet.style.transform = `translate3d(${left}px, 0, 0)`;
+      pet.style.transform = stationary ? 'translate3d(-50%, 0, 0)' : `translate3d(${left}px, 0, 0)`;
       return;
     }
 
@@ -136,7 +137,7 @@
         image.src = src;
         currentSrc = src;
       }
-      pet.style.transform = `translate3d(${x}px, 0, 0)`;
+      pet.style.transform = stationary ? 'translate3d(-50%, 0, 0)' : `translate3d(${x}px, 0, 0)`;
       window.requestAnimationFrame(draw);
     };
 
