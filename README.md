@@ -1,6 +1,6 @@
 # personal-site
 
-张启元的个人主页与博客。已将确认的 SuperMimic 风格预览迁入正式项目：黑白界面、彩色媒体、文章轮播、独立文章页与阅读弹窗。内容继续由 `posts/*.md` 和 `data/*.json` 维护，构建输出完整静态 HTML。
+张启元的个人主页与博客。采用黑白界面、彩色媒体、文章轮播、独立文章页与阅读弹窗。内容继续由 `posts/*.md` 和 `data/*.json` 维护，构建输出完整静态 HTML。
 
 ```sh
 npm ci
@@ -66,6 +66,6 @@ video:
 
 GitHub Actions 保持原流程：`npm ci` → `npm test` → `npm run build`，部署根目录 `dist/`。更新 `data/site.json` 的 `baseURL` 可调整 canonical、RSS 和 sitemap 的绝对域名。`dist/` 不提交 Git。
 
-原独立设计预览保留在本地 `design-samples/supermimic-preview/` 供对照，正式构建不依赖它。迁移视觉检查记录见 `design-qa.md`。
+视觉检查记录见 `design-qa.md`。
 
 推送到 `main` 会触发 GitHub Pages 自动构建与部署。
