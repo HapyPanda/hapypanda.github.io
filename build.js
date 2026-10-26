@@ -142,6 +142,7 @@ function loadPosts() {
       summary: String(meta.summary),
       image: versionLocalAsset(sourceImage),
       imageAlt: meta.imageAlt ? String(meta.imageAlt) : `撕纸拼贴占位封面：${String(meta.title)}`,
+      heroWide: meta.heroWide === true,
       date: date.toISOString(),
       dateISO: iso(date),
       year: date.getUTCFullYear(),

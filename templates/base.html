@@ -34,7 +34,10 @@
 
   <aside class="rail">
     {{#if isPost}}
-    <a class="rail-brand" href="/">首页</a>
+    <nav class="post-rail-actions" aria-label="文章页面导航">
+      <a href="/">首页</a>
+      <a href="/blog/" data-history-back>← 返回</a>
+    </nav>
     {{#if toc}}
     <div class="rail-toc">
       <p class="rail-toc-label">目录</p>
@@ -67,7 +70,7 @@
     </section>
     {{/if}}
     {{#unless isHome}}
-    <a class="rail-brand" href="/">首页</a>
+    <a class="rail-text-link" href="/">首页</a>
     {{/unless}}
     {{#if isHome}}
     <div class="rail-social" aria-label="联系方式">

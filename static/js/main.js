@@ -57,6 +57,17 @@
     });
   });
 
+  // Return to the actual previous page when this tab has browsing history.
+  // The href remains a useful fallback for direct visits and no-JS browsers.
+  const backLink = document.querySelector('[data-history-back]');
+  if (backLink) {
+    backLink.addEventListener('click', (event) => {
+      if (window.history.length <= 1) return;
+      event.preventDefault();
+      window.history.back();
+    });
+  }
+
   // Keep publication previews quiet for people who prefer less motion.
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.querySelectorAll('.media-tile video').forEach((video) => {
