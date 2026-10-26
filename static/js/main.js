@@ -2,6 +2,24 @@
   const $ = (query, root = document) => root.querySelector(query);
   const $$ = (query, root = document) => [...root.querySelectorAll(query)];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const themeButton = $('[data-theme-toggle]');
+  if (themeButton) {
+    const syncTheme = () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      themeButton.setAttribute('aria-pressed', String(dark));
+      themeButton.setAttribute('aria-label', dark ? '切换为浅色主题' : '切换为深色主题');
+      themeButton.title = themeButton.getAttribute('aria-label');
+    };
+    themeButton.hidden = false;
+    syncTheme();
+    themeButton.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('personal-site-preview-theme', next); } catch (_) { /* Optional persistence. */ }
+      syncTheme();
+    });
+  }
+
   // Articles remain static pages. The reader progressively enhances their real links.
   const reader = $('dialog.reader');
   const archive = $('dialog.archive');

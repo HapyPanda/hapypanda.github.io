@@ -15,7 +15,7 @@ When the user asks for a blog or project card image in the site's established vi
 The approved SuperMimic-inspired preview has been promoted into the root static site.
 
 - Edit root `templates/`, `static/`, `data/`, and `posts/`; production must not depend on `design-samples/supermimic-preview/`.
-- The user has removed the entire top header, including its brand and theme button. Do not restore it without a request.
+- Keep the restored small header in document flow, with the brand at left and one theme button at right. It has no bottom border or dividing line.
 - Keep all media in original color. Support image, GIF, and native video in blog and publication media slots; use contain sizing.
 - Keep the approved split-layout article carousel, responsive stacked cards, and full-width text-only cards when media is absent.
 - Keep canonical `/posts/<slug>/`, `/blog/`, `/tags/<tag>/`, RSS, and sitemap functional without JavaScript. Reader dialogs are progressive enhancements.
