@@ -1,0 +1,12 @@
+<p class="eyebrow">THE NOTEBOOK</p><h2>{{ listTitle }}</h2>
+<div class="archive-tools" hidden>
+  <label class="search-field">{{{ icons.search }}}<input type="search" placeholder="搜索文章" aria-label="搜索文章"></label>
+  <select aria-label="筛选标签"><option value="all">全部标签</option>{{#each tagFilters}}<option value="{{ this.name }}">{{ this.name }}</option>{{/each}}</select>
+</div>
+<p class="result-count" aria-live="polite">{{ postCount }} 篇文章</p>
+<nav class="tag-filters" aria-label="标签"><a href="/blog/"{{#if allTags}} aria-current="page"{{/if}}>全部</a>{{#each tagFilters}}<a href="{{ this.url }}"{{#if this.active}} aria-current="page"{{/if}}>#{{ this.name }}</a>{{/each}}</nav>
+<div class="archive-list">{{#each allPosts}}
+<a href="{{ this.url }}" data-reader data-tags="{{ this.tagString }}">
+  <time datetime="{{ this.dateISO }}">{{ this.dateISO }}</time><div><h3>{{ this.title }}</h3><p>{{ this.summary }}</p></div>{{{ icons.arrowUpRight }}}
+</a>{{/each}}</div>
+<div class="empty-state" hidden><p>没有找到相关的文章。</p><button class="pill outline" data-reset-search>重置筛选</button></div>

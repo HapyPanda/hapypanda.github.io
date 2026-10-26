@@ -1,94 +1,30 @@
-<div class="wrap">
-
-  <header class="home-hero">
-    <div class="home-hero-copy">
-      <h1 class="home-title">Happy<span>Panda</span>'s Blog</h1>
-      <p class="home-tagline">你好，我是张启元，欢迎来到我的Blog 👏</p>
-      <nav class="home-social" aria-label="联系方式">
-        {{#each site.social}}<a href="{{ this.href }}">{{ this.label }}</a>{{/each}}
-        <span>WeChat</span>
-      </nav>
-    </div>
-    <aside class="home-experience" aria-label="个人经历">
-      <ol class="home-experience-list">
-        {{#each experience}}
-        <li><time>{{ this.period }}</time><span>{{ this.role }}</span></li>
-        {{/each}}
-      </ol>
-      <div class="home-pet-track" aria-hidden="true">
-        <div class="yuanbao-pet home-pet" data-asset-root="/img/yuanbao" data-stationary="true">
-          <img class="yuanbao-frame" src="/img/yuanbao/walk-left-00.png" alt="">
-        </div>
-      </div>
-    </aside>
-  </header>
-
-  <section class="block metro-section" aria-labelledby="blog">
-    <div class="metro-section-head">
-      <h2 class="metro-section-title" id="blog">{{ sec.blog.name }} <small>01 / NOTES</small></h2>
-    </div>
-    <div class="metro-grid metro-blog-grid">
-      {{#each posts}}
-      <a class="metro-tile {{ this.homeTileClass }}" href="{{ this.url }}" aria-label="打开文章：{{ this.title }}">
-        <img class="metro-tile-media" src="{{ this.image }}" alt="{{ this.imageAlt }}" loading="lazy">
-        <span class="metro-tile-shade"></span>
-        <strong class="metro-cover-title">{{ this.title }}</strong>
-        <span class="metro-glass">
-          <time class="metro-glass-date" datetime="{{ this.dateISO }}">{{ this.dateISO }}</time>
-          <strong class="metro-glass-title">{{ this.title }}</strong>
-          <span class="metro-glass-copy">{{ this.summary }}</span>
-        </span>
-      </a>
-      {{/each}}
-    </div>
-    <p class="metro-all"><a href="/blog/">全部</a></p>
-  </section>
-
-  <section class="block metro-section" aria-labelledby="projects">
-    <div class="metro-section-head">
-      <h2 class="metro-section-title" id="projects">{{ sec.projects.name }} <small>02 / BUILDS</small></h2>
-    </div>
-    <div class="metro-grid metro-project-grid">
-      {{#each projects}}
-      <a class="metro-tile {{ this.homeTileClass }}" href="{{ this.href }}" aria-label="打开项目：{{ this.name }}">
-        <img class="metro-tile-media" src="{{ this.image }}" alt="{{ this.name }}" loading="lazy">
-        <span class="metro-tile-shade"></span>
-        <strong class="metro-cover-title">{{ this.name }}</strong>
-        <span class="metro-glass">
-          <time class="metro-glass-date" datetime="{{ this.year }}">{{ this.year }}</time>
-          <strong class="metro-glass-title">{{ this.name }}</strong>
-          <span class="metro-glass-copy">{{ this.blurb }}</span>
-        </span>
-      </a>
-      {{/each}}
-    </div>
-  </section>
-
-  <section class="block legacy-publications" aria-labelledby="publications">
-    <div class="metro-section-head">
-      <h2 class="metro-section-title" id="publications">{{ sec.publications.name }} <small>03 / PAPERS</small></h2>
-    </div>
-    <ul class="pub-list">
-      {{#each publications}}
-      <li class="card pub content-card">
-        <div class="media-tile media-paper">
-          {{#if this.video}}<video src="{{ this.video }}"{{#if this.poster}} poster="{{ this.poster }}"{{/if}} aria-label="{{ this.title }}" autoplay muted loop playsinline preload="metadata"></video>{{/if}}
-          {{#unless this.video}}
-          {{#if this.image}}<img src="{{ this.image }}" alt="{{ this.title }}" loading="lazy">{{/if}}
-          {{/unless}}
-          {{#unless this.video}}
-          {{#unless this.image}}<span aria-hidden="true">PAPER</span>{{/unless}}
-          {{/unless}}
-        </div>
-        <div class="pub-body content-card-body">
-          <h3 class="pub-title">{{ this.title }}</h3>
-          <p class="pub-authors">{{{ this.authorsHtml }}}</p>
-          <p class="pub-venue">{{ this.venue }}</p>
-          <p class="pub-links">{{#each this.links}}<a href="{{ this.href }}">{{ this.label }}</a>{{/each}}</p>
-        </div>
-      </li>
-      {{/each}}
-    </ul>
-  </section>
-
-</div>
+<section class="hero">
+<p class="eyebrow">{{ site.hero.name }}</p><h1>{{ site.hero.title }}<br><span>{{ site.hero.subtitle }}</span></h1>
+<p class="hero-description">{{ site.hero.greeting }}<br class="mobile-break">{{ site.hero.description }}</p>
+<nav class="hero-social" aria-label="社交链接">{{#each site.social}}<a href="{{ this.href }}">{{ this.label }}{{{ icons.arrowUpRight }}}</a>{{/each}}</nav>
+<div class="hero-experience">{{#each experience}}<p><span>{{ this.period }}</span>{{ this.role }}</p>{{/each}}</div>
+</section>
+<section class="highlights" id="blog" aria-label="博客精选" aria-roledescription="轮播">
+<div class="section-heading wide"><div><p class="eyebrow">博客 / NOTES</p><h2>What I See in AI.</h2></div><a class="text-link" href="/blog/" data-open-archive>全部文章 {{{ icons.arrowUpRight }}}</a></div>
+<div class="highlight-track" tabindex="0" aria-label="精选文章，可左右切换">{{#each posts}}
+<article class="highlight-card {{ this.mediaClass }}" aria-label="{{ this.index }} / {{ featuredCount }}：{{ this.title }}" aria-roledescription="幻灯片">
+<div class="highlight-copy"><p class="card-meta"><time datetime="{{ this.dateISO }}">{{ this.dateISO }}</time><span>{{ this.firstTag }}</span></p>
+<h3><a href="{{ this.url }}" data-reader>{{ this.title }}</a></h3><p class="highlight-description">{{ this.summary }}</p>
+<div class="highlight-foot"><span>{{ this.readingTime }} min read</span><a class="read-cta" href="{{ this.url }}" data-reader>阅读文章 <span class="read-arrow">{{{ icons.arrowUpRight }}}</span></a></div></div>
+{{#if this.hasMedia}}<div class="highlight-visual media-{{ this.mediaType }}">{{#if this.isVideo}}{{{ this.mediaHtml }}}{{/if}}{{#unless this.isVideo}}<a href="{{ this.url }}" data-reader aria-label="阅读：{{ this.title }}">{{{ this.mediaHtml }}}</a>{{/unless}}</div>{{/if}}
+</article>{{/each}}</div>
+<div class="carousel-footer wide"><p class="carousel-caption" aria-live="polite"><b data-slide-number>01</b> <span>/ {{ featuredCountPadded }}</span></p>
+<div class="carousel-controls" hidden><div class="carousel-pager" role="group" aria-label="选择精选文章">{{#each posts}}<button class="pager-dot{{#if @first}} active{{/if}}" data-slide="{{ @index }}" aria-label="第 {{ this.index }} 篇：{{ this.title }}" aria-current="{{ @first }}"><span></span></button>{{/each}}</div><button class="icon-button play-button" aria-label="暂停自动切换"><span data-pause-icon>{{{ icons.pause }}}</span><span data-play-icon hidden>{{{ icons.play }}}</span></button></div>
+<div class="carousel-arrows" hidden><button class="icon-button" data-slide-prev aria-label="上一篇精选">{{{ icons.arrowLeft }}}</button><button class="icon-button" data-slide-next aria-label="下一篇精选">{{{ icons.arrowRight }}}</button></div></div>
+</section>
+<section class="research-section section-space" id="research">
+<div class="section-heading wide" id="publications"><div><p class="eyebrow">论文 / RESEARCH</p><h2>Research in<br>Video Generation.</h2></div><p class="section-intro">交互式视频生成，<br>视频生成物理真实性</p></div>
+<div class="research-list wide">{{#each publications}}<article class="research-item">
+<div class="research-media">{{#if this.isVideo}}{{{ this.mediaHtml }}}{{/if}}{{#unless this.isVideo}}<a href="{{ this.primaryHref }}" aria-label="阅读论文：{{ this.title }}" target="_blank" rel="noopener noreferrer">{{{ this.mediaHtml }}}</a>{{/unless}}</div>
+<div class="research-info"><p class="paper-venue"><span class="venue-label">{{ this.venue }}{{#if this.presentation}}<strong class="presentation-badge">{{ this.presentation }}</strong>{{/if}}</span><span class="paper-index">{{ this.indexPadded }}</span></p>
+<h3><a href="{{ this.primaryHref }}" target="_blank" rel="noopener noreferrer">{{ this.title }}</a></h3><p class="paper-authors">{{{ this.authorsHtml }}}</p>
+<nav class="paper-links" aria-label="{{ this.title }} 相关链接">{{#each this.links}}<a href="{{ this.href }}" target="_blank" rel="noopener noreferrer">{{ this.label }}{{{ icons.arrowUpRight }}}</a>{{/each}}</nav></div></article>{{/each}}</div>
+</section>
+<section class="projects-section section-space" id="projects"><div class="section-heading wide"><div><p class="eyebrow">项目 / BUILDS</p><h2>A few things I've built.</h2></div></div>
+<div class="projects-grid wide">{{#each projects}}<a class="project-card" href="{{ this.href }}" target="_blank" rel="noopener noreferrer"><div class="project-top"><span>{{ this.year }}</span>{{{ icons.arrowUpRight }}}</div><div><p class="project-index">{{ this.indexPadded }}</p><h3>{{ this.name }}</h3><p class="project-blurb">{{ this.blurb }}</p></div><p class="project-tags">{{ this.tagLabel }}</p></a>{{/each}}</div></section>
+<dialog class="modal archive" aria-label="全部文章"><div class="modal-sheet"><button class="icon-button modal-close" data-close-modal aria-label="关闭">{{{ icons.close }}}</button>{{{ archiveHtml }}}</div></dialog>

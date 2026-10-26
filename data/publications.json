@@ -6,9 +6,18 @@
     "year": 2026,
     "image": "/assets/publications/physrvg.gif",
     "links": [
-      { "label": "arXiv", "href": "https://arxiv.org/abs/2601.11087" },
-      { "label": "Webpage", "href": "https://lucaria-academy.github.io/PhysRVG/" },
-      { "label": "Code", "href": "https://github.com/ant-research/PhysRVG" }
+      {
+        "label": "arXiv",
+        "href": "https://arxiv.org/abs/2601.11087"
+      },
+      {
+        "label": "Webpage",
+        "href": "https://lucaria-academy.github.io/PhysRVG/"
+      },
+      {
+        "label": "Code",
+        "href": "https://github.com/ant-research/PhysRVG"
+      }
     ]
   },
   {
@@ -18,9 +27,18 @@
     "year": 2026,
     "image": "/assets/publications/codance.gif",
     "links": [
-      { "label": "arXiv", "href": "https://arxiv.org/abs/2601.11096" },
-      { "label": "Webpage", "href": "https://lucaria-academy.github.io/CoDance/" },
-      { "label": "Code", "href": "https://github.com/Lucaria-Academy/CoDance" }
+      {
+        "label": "arXiv",
+        "href": "https://arxiv.org/abs/2601.11096"
+      },
+      {
+        "label": "Webpage",
+        "href": "https://lucaria-academy.github.io/CoDance/"
+      },
+      {
+        "label": "Code",
+        "href": "https://github.com/Lucaria-Academy/CoDance"
+      }
     ]
   },
   {
@@ -30,8 +48,12 @@
     "year": 2026,
     "image": "/assets/publications/semo.gif",
     "links": [
-      { "label": "arXiv", "href": "https://arxiv.org/abs/2503.10096" }
-    ]
+      {
+        "label": "arXiv",
+        "href": "https://arxiv.org/abs/2503.10096"
+      }
+    ],
+    "presentation": "Oral"
   },
   {
     "title": "Hi-VAE: Efficient Video Autoencoding with Global and Detailed Motion",
@@ -40,7 +62,10 @@
     "year": 2025,
     "image": "/assets/publications/hivae.png",
     "links": [
-      { "label": "arXiv", "href": "https://arxiv.org/abs/2506.07136" }
+      {
+        "label": "arXiv",
+        "href": "https://arxiv.org/abs/2506.07136"
+      }
     ]
   },
   {
@@ -50,7 +75,10 @@
     "year": 2024,
     "image": "/assets/publications/uniavatar.png",
     "links": [
-      { "label": "arXiv", "href": "https://arxiv.org/abs/2412.19860" }
+      {
+        "label": "arXiv",
+        "href": "https://arxiv.org/abs/2412.19860"
+      }
     ]
   }
 ]

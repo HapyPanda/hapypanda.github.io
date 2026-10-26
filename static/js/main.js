@@ -1,217 +1,233 @@
-/* Progressive enhancement only. With JS disabled every page is still complete:
-   the TOC is a plain open <details>,
-   code is readable without highlighting, and math shows as raw TeX. */
-
-(function () {
-  'use strict';
-
-  // --- KaTeX ---------------------------------------------------------------
-  if (window.renderMathInElement) {
-    window.renderMathInElement(document.body, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false },
-      ],
-      ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option'],
-      throwOnError: false,
-      errorColor: '#B4232A',
+(() => {
+  const $ = (query, root = document) => root.querySelector(query);
+  const $$ = (query, root = document) => [...root.querySelectorAll(query)];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  // Articles remain static pages. The reader progressively enhances their real links.
+  const reader = $('dialog.reader');
+  const archive = $('dialog.archive');
+  const content = $('[data-reader-content]', reader);
+  let originURL = location.href;
+  let readerTitle = document.title;
+  let requestID = 0;
+  let focusReturn = null;
+  const pauseMedia = root => $$('video', root).forEach(video => video.pause());
+  const syncDialogs = () => {
+    document.body.style.overflow = $('dialog[open]') ? 'hidden' : '';
+    if ($('dialog[open]')) pauseMedia(document);
+  };
+  let mathLoader;
+  const loadScript = src => new Promise((resolve, reject) => {
+    const script = document.createElement('script'); script.src = src;
+    script.onload = resolve; script.onerror = reject; document.head.append(script);
+  });
+  async function enhanceArticle(root) {
+    $$('.code-block', root).forEach(block => {
+      if ($('.copy-code', block)) return;
+      const button = document.createElement('button');
+      button.className = 'copy-code'; button.textContent = '复制'; button.type = 'button';
+      button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText($('code', block).textContent);
+          button.textContent = '已复制'; setTimeout(() => { button.textContent = '复制'; }, 1800);
+        } catch (_) { button.textContent = '请手动复制'; }
+      });
+      block.append(button);
     });
+    if (root.dataset.math !== 'true' || !$('.math-inline, .math-block', root)) return;
+    try {
+      if (!mathLoader) {
+        const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/vendor/katex/katex.min.css'; document.head.append(css);
+        mathLoader = loadScript('/vendor/katex/katex.min.js').then(() => loadScript('/vendor/katex/contrib/auto-render.min.js'));
+      }
+      await mathLoader;
+      window.renderMathInElement(root, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    } catch (_) { mathLoader = null; /* Leave the original TeX readable if loading fails. */ }
+  }
+  const standalone = $('.standalone .reader-article');
+  if (standalone) enhanceArticle(standalone);
+
+  async function openArticle(href, push = true) {
+    const url = new URL(href, location.href);
+    const id = ++requestID;
+    try {
+      const response = await fetch(url.pathname);
+      if (!response.ok) throw new Error('Missing article');
+      const html = new DOMParser().parseFromString(await response.text(), 'text/html');
+      const article = $('.reader-article', html);
+      if (!article) throw new Error('Invalid article');
+      if (id !== requestID) return;
+      if (!reader.open) {
+        if (!history.state?.reader) originURL = location.href;
+        readerTitle = document.title;
+        focusReturn = document.activeElement;
+      }
+      archive?.close();
+      pauseMedia(content);
+      content.replaceChildren(document.importNode(article, true));
+      if (!reader.open) reader.showModal();
+      reader.scrollTop = 0;
+      if (push) history.pushState({ reader: true, origin: originURL }, '', url.pathname + url.hash);
+      document.title = html.title;
+      syncDialogs();
+      enhanceArticle($('.reader-article', content));
+      if (url.hash) {
+        const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+        target?.scrollIntoView();
+      }
+    } catch (_) { if (id === requestID) location.assign(url.href); }
+  }
+  function closeDialog(dialog, changeURL = true) {
+    ++requestID;
+    pauseMedia(dialog);
+    dialog.close();
+    if (dialog === reader) {
+      if (changeURL) history.replaceState(null, '', originURL);
+      document.title = readerTitle;
+      content.replaceChildren();
+    }
+    syncDialogs();
+    if (focusReturn?.isConnected) focusReturn.focus({ preventScroll: true });
+  }
+  $$('dialog').forEach(dialog => {
+    $('[data-close-modal]', dialog).addEventListener('click', () => closeDialog(dialog));
+    dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(dialog); });
+    dialog.addEventListener('click', event => { if (event.target === dialog) closeDialog(dialog); });
+  });
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[data-reader]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !reader.showModal) return;
+    // A standalone page uses ordinary navigation for its older/newer links.
+    if (link.closest('.standalone.reader')) return;
+    event.preventDefault(); openArticle(link.href);
+  });
+  window.addEventListener('popstate', () => {
+    if (history.state?.reader) { originURL = history.state.origin; openArticle(location.href, false); }
+    else if (reader.open) closeDialog(reader, false);
+  });
+  $('[data-open-archive]')?.addEventListener('click', event => {
+    if (!archive?.showModal || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); focusReturn = event.currentTarget;
+    archive.showModal(); syncDialogs();
+  });
+  const legacySlug = new URLSearchParams(location.search).get('post');
+  if (legacySlug && /^[\w-]+$/.test(legacySlug)) {
+    const clean = new URL(location.href); clean.searchParams.delete('post');
+    history.replaceState(null, '', clean); originURL = clean.href;
+    openArticle(`/posts/${legacySlug}/`);
   }
 
-  // --- code highlighting + copy button -------------------------------------
-  const blocks = document.querySelectorAll('.code-block');
-  blocks.forEach((block) => {
-    const code = block.querySelector('code');
-    if (!code) return;
-
-    if (window.hljs) {
-      try { window.hljs.highlightElement(code); } catch (e) { /* unknown language */ }
-    }
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'copy-btn';
-    btn.textContent = 'copy';
-    btn.setAttribute('aria-label', '复制代码');
-    btn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(code.textContent.replace(/\n$/, ''));
-        btn.textContent = 'copied';
-      } catch (e) {
-        btn.textContent = 'failed';
-      }
-      setTimeout(() => { btn.textContent = 'copy'; }, 1400);
-    });
-    block.appendChild(btn);
+  // Search the same rendered list that remains readable without JavaScript.
+  $$('.archive').forEach(root => {
+    const tools = $('.archive-tools', root);
+    if (!tools) return;
+    const input = $('input', tools), select = $('select', tools);
+    const rows = $$('.archive-list>a', root);
+    tools.hidden = false;
+    // Real tag links are useful on standalone pages; the dialog uses its select.
+    if (root.tagName === 'DIALOG') $('.tag-filters', root).hidden = true;
+    else select.hidden = true;
+    const filter = () => {
+      const query = input.value.trim().toLocaleLowerCase();
+      let count = 0;
+      rows.forEach(row => {
+        row.hidden = !row.textContent.toLocaleLowerCase().includes(query) || (select.value !== 'all' && !row.dataset.tags.split(' ').includes(select.value));
+        if (!row.hidden) count++;
+      });
+      $('.result-count', root).textContent = `${count} 篇文章`;
+      $('.empty-state', root).hidden = count !== 0;
+    };
+    input.addEventListener('input', filter); select.addEventListener('change', filter);
+    $('[data-reset-search]', root).addEventListener('click', () => { input.value = ''; select.value = 'all'; filter(); input.focus(); });
   });
 
-  // --- 元宝：在毛玻璃舞台上往返、休息，再去右侧写代码 ---------------------
-  const yuanbao = document.querySelector('.yuanbao-pet');
-  if (yuanbao) animateYuanbao(yuanbao);
-
-  // Blog cards are one large hit target; their nested links keep their own jobs.
-  document.querySelectorAll('.post-card[data-href]').forEach((card) => {
-    card.addEventListener('click', (event) => {
-      if (event.target.closest('a, button, input, textarea, select')) return;
-      window.location.href = card.dataset.href;
+  // Native horizontal scrolling works even before this enhancement loads.
+  const track = $('.highlight-track');
+  if (!track) return;
+  const section = track.closest('section');
+  const cards = [...track.children];
+  const controls = $('.carousel-controls', section);
+  const playButton = $('.play-button', controls);
+  const dots = $$('.pager-dot', controls);
+  controls.hidden = false; $('.carousel-arrows', section).hidden = false;
+  let active = 0, playing = !reduced.matches, visible = false, hovered = false, focused = false;
+  let progress = 0, previous = null, drag = null, dragged = false;
+  const reset = () => { progress = 0; controls.style.setProperty('--progress', '0'); };
+  const syncPlay = () => {
+    playButton.disabled = reduced.matches;
+    playButton.setAttribute('aria-label', playing ? '暂停自动切换' : '播放精选文章');
+    playButton.title = reduced.matches ? '已按系统设置减少动态效果' : '';
+    $('[data-pause-icon]', controls).hidden = !playing;
+    $('[data-play-icon]', controls).hidden = playing;
+  };
+  function goTo(index, user = true) {
+    const next = (index + cards.length) % cards.length;
+    const card = cards[next];
+    track.scrollTo({ left: card.offsetLeft - track.offsetLeft - (track.clientWidth - card.offsetWidth) / 2, behavior: reduced.matches ? 'instant' : 'smooth' });
+    if (user) { playing = false; syncPlay(); }
+    reset();
+  }
+  function pauseInactive() {
+    cards.forEach((card, index) => { if (index !== active || !visible || document.hidden || $('dialog[open]')) pauseMedia(card); });
+  }
+  track.addEventListener('scroll', () => {
+    const center = track.scrollLeft + track.clientWidth / 2;
+    let nearest = 0, distance = Infinity;
+    cards.forEach((card, index) => {
+      const delta = Math.abs(card.offsetLeft - track.offsetLeft + card.offsetWidth / 2 - center);
+      if (delta < distance) { nearest = index; distance = delta; }
     });
+    if (active === nearest) return;
+    active = nearest; reset(); pauseInactive();
+    dots.forEach((dot, index) => { dot.classList.toggle('active', index === active); dot.setAttribute('aria-current', String(index === active)); });
+    $('[data-slide-number]', section).textContent = String(active + 1).padStart(2, '0');
+  }, { passive: true });
+  dots.forEach((dot, index) => dot.addEventListener('click', () => goTo(index)));
+  $('[data-slide-prev]', section).addEventListener('click', () => goTo(active - 1));
+  $('[data-slide-next]', section).addEventListener('click', () => goTo(active + 1));
+  playButton.addEventListener('click', () => { playing = !playing; focused = false; syncPlay(); });
+  track.addEventListener('keydown', event => {
+    if (event.target.closest('video')) return;
+    if (['ArrowRight', 'ArrowLeft'].includes(event.key)) { event.preventDefault(); goTo(active + (event.key === 'ArrowRight' ? 1 : -1)); }
   });
-
-  // Return to the actual previous page when this tab has browsing history.
-  // The href remains a useful fallback for direct visits and no-JS browsers.
-  const backLink = document.querySelector('[data-history-back]');
-  if (backLink) {
-    backLink.addEventListener('click', (event) => {
-      if (window.history.length <= 1) return;
-      event.preventDefault();
-      window.history.back();
-    });
-  }
-
-  // Keep publication previews quiet for people who prefer less motion.
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.querySelectorAll('.media-tile video').forEach((video) => {
-      video.autoplay = false;
-      video.pause();
-    });
-  }
-
-  function animateYuanbao(pet) {
-    const image = pet.querySelector('.yuanbao-frame');
-    const track = pet.parentElement;
-    const root = pet.dataset.assetRoot;
-    const stationary = pet.dataset.stationary === 'true';
-    if (!image || !track || !root) return;
-
-    const paths = {
-      left: Array.from({ length: 8 }, (_, i) => `${root}/walk-left-${String(i).padStart(2, '0')}.png`),
-      sleep: Array.from({ length: 6 }, (_, i) => `${root}/sleep-${String(i).padStart(2, '0')}.png`),
-      right: Array.from({ length: 8 }, (_, i) => `${root}/walk-right-${String(i).padStart(2, '0')}.png`),
-      code: Array.from({ length: 6 }, (_, i) => `${root}/code-${String(i).padStart(2, '0')}.png`),
-    };
-
-    Object.values(paths).flat().forEach((src) => {
-      const preload = new Image();
-      preload.src = src;
-    });
-
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const positions = () => {
-      const width = track.getBoundingClientRect().width;
-      const petWidth = pet.getBoundingClientRect().width;
-      const limit = Math.max(0, width - petWidth);
-      return {
-        left: Math.min(limit, width * .27),
-        right: Math.min(limit, width * .55),
-      };
-    };
-
-    if (reducedMotion.matches) {
-      const { left } = positions();
-      image.src = paths.sleep[5];
-      pet.style.transform = stationary ? 'translate3d(-50%, 0, 0)' : `translate3d(${left}px, 0, 0)`;
-      return;
+  track.addEventListener('pointerdown', event => {
+    if (event.target.closest('video')) return;
+    playing = false; syncPlay(); dragged = false;
+    if (event.pointerType === 'mouse') drag = { x: event.clientX, scroll: track.scrollLeft };
+  });
+  track.addEventListener('pointermove', event => {
+    if (!drag) return;
+    const delta = event.clientX - drag.x;
+    if (Math.abs(delta) > 6) dragged = true;
+    if (dragged) track.scrollLeft = drag.scroll - delta;
+  });
+  const endDrag = () => { drag = null; setTimeout(() => { dragged = false; }, 0); };
+  track.addEventListener('pointerup', endDrag);
+  track.addEventListener('pointerleave', () => { endDrag(); hovered = false; });
+  track.addEventListener('dragstart', event => event.preventDefault());
+  track.addEventListener('click', event => { if (dragged) { event.preventDefault(); event.stopPropagation(); } }, true);
+  track.addEventListener('mouseenter', () => { hovered = true; });
+  track.addEventListener('focusin', () => { focused = true; });
+  track.addEventListener('focusout', event => { if (!track.contains(event.relatedTarget)) focused = false; });
+  new IntersectionObserver(entries => { visible = entries[0].isIntersecting; pauseInactive(); }, { threshold: .25 }).observe(section);
+  document.addEventListener('visibilitychange', () => { pauseInactive(); if (document.hidden) pauseMedia(document); });
+  reduced.addEventListener('change', () => { if (reduced.matches) playing = false; syncPlay(); });
+  new ResizeObserver(() => {
+    const card = cards[active];
+    track.scrollTo({ left: card.offsetLeft - track.offsetLeft - (track.clientWidth - card.offsetWidth) / 2, behavior: 'instant' });
+  }).observe(track);
+  // A video outside the viewport should stop too, including publication media.
+  const mediaObserver = new IntersectionObserver(entries => entries.forEach(entry => { if (!entry.isIntersecting) entry.target.pause(); }));
+  $$('video').forEach(video => mediaObserver.observe(video));
+  syncPlay();
+  function tick(now) {
+    const canPlay = playing && visible && !hovered && !focused && !document.hidden && !reduced.matches && !$('dialog[open]') && !$$('video', track).some(video => !video.paused);
+    if (canPlay && previous !== null) {
+      progress += Math.min(now - previous, 100) / 7500;
+      controls.style.setProperty('--progress', String(Math.min(progress, 1)));
+      if (progress >= 1) goTo(active + 1, false);
     }
-
-    const scenes = [
-      { frames: paths.left, duration: 3100, frameMs: 118, from: 'right', to: 'left' },
-      { frames: paths.sleep, duration: 5000, frameMs: 420, from: 'left', to: 'left' },
-      { frames: paths.right, duration: 3300, frameMs: 118, from: 'left', to: 'right' },
-      { frames: paths.code, duration: 6200, frameMs: 190, from: 'right', to: 'right' },
-    ];
-    const cycle = scenes.reduce((sum, scene) => sum + scene.duration, 0);
-    let startedAt;
-    let currentSrc = '';
-
-    const ease = (value) => value * value * (3 - 2 * value);
-    const draw = (now) => {
-      if (startedAt === undefined) startedAt = now;
-      let elapsed = (now - startedAt) % cycle;
-      let scene = scenes[0];
-
-      for (const candidate of scenes) {
-        if (elapsed < candidate.duration) {
-          scene = candidate;
-          break;
-        }
-        elapsed -= candidate.duration;
-      }
-
-      const anchors = positions();
-      const progress = Math.min(1, elapsed / scene.duration);
-      const from = anchors[scene.from];
-      const to = anchors[scene.to];
-      const x = from + (to - from) * ease(progress);
-      const src = scene.frames[Math.floor(elapsed / scene.frameMs) % scene.frames.length];
-
-      if (src !== currentSrc) {
-        image.src = src;
-        currentSrc = src;
-      }
-      pet.style.transform = stationary ? 'translate3d(-50%, 0, 0)' : `translate3d(${x}px, 0, 0)`;
-      window.requestAnimationFrame(draw);
-    };
-
-    window.requestAnimationFrame(draw);
+    previous = now;
+    requestAnimationFrame(tick);
   }
-
-  // --- TOC / rail: mark the section currently on screen ----------------------
-  spy('.rail-toc a[href^="#"]');
-  spy('.rail-nav a[href^="#"]');
-
-  function spy(selector) {
-    const links = Array.from(document.querySelectorAll(selector));
-    if (!links.length) return;
-
-    const byId = new Map(links.map((a) => [decodeURIComponent(a.hash.slice(1)), a]));
-    const targets = Array.from(byId.keys())
-      .map((id) => document.getElementById(id))
-      .filter(Boolean);
-    const pageTargets = targets.filter((target) => !target.closest('.rail'));
-    let frame = 0;
-
-    const paint = () => {
-      frame = 0;
-      let active = null;
-      let hashPinned = false;
-      const nearTop = window.scrollY <= 24;
-      const topHash = decodeURIComponent(window.location.hash.slice(1));
-
-      // The home-page "about" card lives inside the sticky rail, so its own
-      // viewport position cannot be used as a scroll signal.
-      if (nearTop && byId.has('about') && topHash !== 'blog') active = 'about';
-
-      const hashTarget = pageTargets.find((target) => target.id === topHash);
-      if (!active && hashTarget) {
-        const hashTop = hashTarget.getBoundingClientRect().top;
-        if (hashTop >= 0 && hashTop < window.innerHeight) {
-          active = hashTarget.id;
-          hashPinned = true;
-        }
-      }
-
-      if (!active) {
-        const threshold = Math.min(420, window.innerHeight * .45);
-        for (const target of pageTargets) {
-          if (target.getBoundingClientRect().top <= threshold) active = target.id;
-        }
-      }
-
-      const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
-      if (atBottom && !hashPinned && pageTargets.length) active = pageTargets[pageTargets.length - 1].id;
-      if (!active) active = pageTargets[0]?.id || targets[0]?.id || null;
-
-      links.forEach((a) => a.classList.remove('is-current'));
-      if (active && byId.has(active)) byId.get(active).classList.add('is-current');
-    };
-
-    const schedule = () => {
-      if (!frame) frame = window.requestAnimationFrame(paint);
-    };
-
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule, { passive: true });
-    window.addEventListener('hashchange', schedule);
-    paint();
-  }
+  requestAnimationFrame(tick);
 })();

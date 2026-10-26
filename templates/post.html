@@ -1,28 +1,11 @@
-<div class="wrap post-layout">
-  <article class="post">
-    <header class="post-header">
-      <h1 class="post-title">{{ post.title }}</h1>
-      <p class="post-meta">
-        <time datetime="{{ post.dateISO }}">{{ post.dateISO }}</time>
-        <span class="dot">·</span><span>{{ post.readingTime }} min read</span>
-        {{#if post.draft}}<span class="dot">·</span><span class="draft-flag">draft</span>{{/if}}
-      </p>
-      <p class="tag-row">{{#each post.tags}}<a class="tag" href="{{ this.url }}">{{ this.name }}</a>{{/each}}</p>
-    </header>
-
-    {{#if post.image}}
-    <figure class="post-hero{{#if post.heroWide}} post-hero--wide-crop{{/if}}">
-      <img src="{{ post.image }}" alt="{{ post.imageAlt }}">
-    </figure>
-    {{/if}}
-
-    <div class="prose post-content">
-      {{{ post.content }}}
-    </div>
-
-    <nav class="post-nav" aria-label="上一篇 / 下一篇">
-      {{#if post.newer}}<a class="post-nav-item newer" href="{{ post.newer.url }}"><span class="post-nav-label">← 更新的</span><span>{{ post.newer.title }}</span></a>{{/if}}
-      {{#if post.older}}<a class="post-nav-item older" href="{{ post.older.url }}"><span class="post-nav-label">更早的 →</span><span>{{ post.older.title }}</span></a>{{/if}}
-    </nav>
-  </article>
-</div>
+<section class="standalone reader wide">
+<nav class="page-breadcrumb" aria-label="文章页面导航"><a href="/">首页</a><span>/</span><a href="/blog/">全部文章</a></nav>
+<article class="reader-article" data-math="{{ post.math }}">
+<div class="reader-meta"><time datetime="{{ post.dateISO }}">{{ post.dateISO }}</time><span>/</span>{{ post.readingTime }} min read{{#if post.draft}}<span>草稿</span>{{/if}}</div>
+<h1>{{ post.title }}</h1><div class="reader-tags">{{#each post.tags}}<a href="{{ this.url }}">{{ this.name }}</a>{{#unless @last}} · {{/unless}}{{/each}}</div>
+{{{ post.readerMediaHtml }}}
+<div class="article-body">{{{ post.content }}}</div>
+<nav class="reader-navigation" aria-label="文章翻页">
+{{#if post.newer}}<a href="{{ post.newer.url }}" data-reader>{{{ icons.arrowLeft }}}<span>更新的文章<strong>{{ post.newer.title }}</strong></span></a>{{/if}}
+{{#if post.older}}<a href="{{ post.older.url }}" data-reader><span>更早的文章<strong>{{ post.older.title }}</strong></span>{{{ icons.arrowRight }}}</a>{{/if}}
+</nav></article></section>

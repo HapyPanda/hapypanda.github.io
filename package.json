@@ -8,11 +8,12 @@
     "build": "node build.js",
     "dev": "node build.js --drafts --watch",
     "serve": "npx serve dist",
-    "test": "node lib/template.test.js && node lib/markdown.test.js"
+    "test": "node lib/template.test.js && node lib/markdown.test.js && node lib/site.test.js"
   },
   "dependencies": {
+    "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
-    "marked": "^12.0.0",
-    "github-slugger": "^2.0.0"
+    "katex": "0.19.1",
+    "marked": "^12.0.0"
   }
 }

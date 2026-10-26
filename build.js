@@ -11,7 +11,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import matter from 'gray-matter';
-import { render } from './lib/template.js';
+import { render, escapeHtml } from './lib/template.js';
+import { getMedia } from './lib/media.js';
 import { renderMarkdown } from './lib/markdown.js';
 import { renderRss, renderSitemap } from './lib/feed.js';
 
@@ -22,9 +23,6 @@ const p = (...s) => path.join(ROOT, ...s);
 const ARGS = new Set(process.argv.slice(2));
 const INCLUDE_DRAFTS = ARGS.has('--drafts');
 const WATCH = ARGS.has('--watch');
-const PLACEHOLDER_IMAGE = '/assets/blog/generic-torn-paper-placeholder.png';
-const HOME_BLOG_LAYOUT = ['metro-tile--hero', 'metro-tile--square', 'metro-tile--medium', 'metro-tile--medium', 'metro-tile--medium'];
-const HOME_PROJECT_LAYOUT = ['metro-tile--project-a', 'metro-tile--project-b', 'metro-tile--project-c'];
 
 const C = {
   dim: (s) => `\x1b[2m${s}\x1b[0m`,
@@ -77,6 +75,22 @@ function versionLocalAsset(url) {
   return `${pathname}?v=${version}`;
 }
 
+/** Normalize image / GIF / video fields once for every template. */
+function mediaFields(item) {
+  const media = getMedia(item);
+  if (!media || media.src.includes('generic-torn-paper-placeholder')) return {
+    hasMedia: false, mediaClass: 'text-only', mediaHtml: '', readerMediaHtml: '',
+  };
+  const src = escapeHtml(versionLocalAsset(media.src));
+  const alt = escapeHtml(media.alt);
+  const isVideo = media.type === 'video';
+  const markup = (className = '') => isVideo
+    ? `<video class="${className}" src="${src}"${media.poster ? ` poster="${escapeHtml(versionLocalAsset(media.poster))}"` : ''} aria-label="${alt}" controls playsinline muted loop preload="metadata"></video>`
+    : `<img class="${className}" src="${src}" alt="${alt}" loading="lazy" decoding="async" draggable="false">`;
+  return { hasMedia: true, mediaClass: 'has-media', mediaType: media.type, isVideo,
+    mediaHtml: markup(), readerMediaHtml: markup('reader-cover') };
+}
+
 /** Bold the site owner inside an author string. Returns HTML. */
 function highlightAuthor(authors, aliases) {
   let out = authors.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
@@ -85,17 +99,6 @@ function highlightAuthor(authors, aliases) {
     if (out.includes('<strong>')) break;
   }
   return out;
-}
-
-/** [{year, posts:[…]}] in the order given (posts already sorted newest first). */
-function groupByYear(posts) {
-  const groups = [];
-  for (const post of posts) {
-    const year = new Date(post.date).getUTCFullYear();
-    if (!groups.length || groups[groups.length - 1].year !== year) groups.push({ year, posts: [] });
-    groups[groups.length - 1].posts.push(post);
-  }
-  return groups;
 }
 
 // ── 3+4. load and validate posts ──────────────────────────────────────────────
@@ -133,15 +136,18 @@ function loadPosts() {
     const isDraft = meta.draft === true;
     const rendered = renderMarkdown(body);
 
-    const sourceImage = meta.image ? String(meta.image) : PLACEHOLDER_IMAGE;
+    const sourceImage = meta.image ? String(meta.image) : '';
+    const hasCover = Boolean(sourceImage && !sourceImage.includes('generic-torn-paper-placeholder'));
     const post = {
+      ...mediaFields(meta),
       slug,
       url: `/posts/${slug}/`,
       file: where,
       title: String(meta.title),
       summary: String(meta.summary),
-      image: versionLocalAsset(sourceImage),
-      imageAlt: meta.imageAlt ? String(meta.imageAlt) : `撕纸拼贴占位封面：${String(meta.title)}`,
+      image: hasCover ? versionLocalAsset(sourceImage) : '',
+      hasCover,
+      imageAlt: meta.imageAlt ? String(meta.imageAlt) : String(meta.title),
       heroWide: meta.heroWide === true,
       date: date.toISOString(),
       dateISO: iso(date),
@@ -150,6 +156,8 @@ function loadPosts() {
       math: meta.math === undefined ? true : meta.math === true,
       tags: tags.map((name) => ({ name, url: `/tags/${name}/` })),
       tagNames: tags,
+      firstTag: tags[0],
+      tagString: tags.join(" "),
       content: rendered.html,
       toc: rendered.toc,
       readingTime: rendered.readingTime,
@@ -157,12 +165,7 @@ function loadPosts() {
     (isDraft ? drafts : posts).push(post);
   }
 
-  // 5. newest first, then prev(newer) / next(older) pointers
   posts.sort((a, b) => new Date(b.date) - new Date(a.date) || a.slug.localeCompare(b.slug));
-  posts.forEach((post, i) => {
-    post.newer = posts[i - 1] ? { title: posts[i - 1].title, url: posts[i - 1].url } : null;
-    post.older = posts[i + 1] ? { title: posts[i + 1].title, url: posts[i + 1].url } : null;
-  });
 
   return { posts, drafts };
 }
@@ -174,28 +177,31 @@ function build() {
   const assetVersion = createHash('sha1')
     .update(fs.readFileSync(p('static/css/style.css')))
     .update(fs.readFileSync(p('static/js/main.js')))
+    .update(fs.readFileSync(p('static/js/theme.js')))
     .digest('hex')
     .slice(0, 10);
-  const publications = readJson('data/publications.json').map((pub) => ({
-    ...pub,
-    image: versionLocalAsset(pub.image),
-    video: versionLocalAsset(pub.video),
-    poster: versionLocalAsset(pub.poster),
+  const icons = Object.fromEntries(fs.readdirSync(p('static/img/icons')).filter(name => name.endsWith('.svg'))
+    .map(name => [name.slice(0, -4), fs.readFileSync(p('static/img/icons', name), 'utf8')]));
+  const publications = readJson('data/publications.json').map((pub, index) => ({
+    ...pub, ...mediaFields(pub), indexPadded: String(index + 1).padStart(2, '0'),
     authorsHtml: highlightAuthor(pub.authors, site.authorAliases),
-    primaryHref: pub.links?.[0]?.href || '#publications',
+    primaryHref: pub.links?.[0]?.href || '#research',
   }));
   const projects = readJson('data/projects.json').map((project, index) => ({
-    ...project,
-    image: versionLocalAsset(project.image || PLACEHOLDER_IMAGE),
-    video: versionLocalAsset(project.video),
-    poster: versionLocalAsset(project.poster),
-    homeTileClass: HOME_PROJECT_LAYOUT[index % HOME_PROJECT_LAYOUT.length],
+    ...project, indexPadded: String(index + 1).padStart(2, '0'), tagLabel: project.tags.join(' / '),
   }));
 
   const all = loadPosts();
   const posts = INCLUDE_DRAFTS ? [...all.posts, ...all.drafts].sort(
     (a, b) => new Date(b.date) - new Date(a.date)
   ) : all.posts;
+
+  posts.forEach((post, index) => {
+    post.newer = posts[index - 1] ? { title: posts[index - 1].title, url: posts[index - 1].url } : null;
+    post.older = posts[index + 1] ? { title: posts[index + 1].title, url: posts[index + 1].url } : null;
+  });
+  const tagFilters = [...new Set(posts.flatMap(post => post.tagNames))].sort()
+    .map(name => ({ name, url: `/tags/${name}/` }));
 
   const tpl = (name) => fs.readFileSync(p('templates', name), 'utf8');
   const base = tpl('base.html');
@@ -205,7 +211,8 @@ function build() {
   fs.mkdirSync(DIST, { recursive: true });
 
   const page = (bodyTpl, ctx, meta) => render(base, {
-    site,
+    site, icons,
+    ogType: meta.isPost ? 'article' : 'website',
     assetVersion,
     ...ctx,
     ...meta,
@@ -214,17 +221,19 @@ function build() {
       ...item,
       active: item.href === '/' ? meta.canonical === '/' : meta.canonical.startsWith(item.href),
     })),
-    body: render(bodyTpl, { site, ...ctx }),
+    body: render(bodyTpl, { site, icons, ...ctx }),
   });
 
   // 7a. home
   writeFile('index.html', page(tpl('home.html'), {
-    sec: Object.fromEntries((site.sections || []).map((s) => [s.id, s])),
+    archiveHtml: render(tpl('archive.html'), { icons, allPosts: posts, tagFilters, postCount: posts.length, listTitle: '所有想法，都在这里。', allTags: true }),
+    featuredCount: Math.min(posts.length, site.homeBlogCount || 5),
+    featuredCountPadded: String(Math.min(posts.length, site.homeBlogCount || 5)).padStart(2, '0'),
     publications: publications.slice(0, site.homePublicationCount || publications.length),
     projects,
     posts: posts.slice(0, site.homeBlogCount || 5).map((post, index) => ({
       ...post,
-      homeTileClass: HOME_BLOG_LAYOUT[index % HOME_BLOG_LAYOUT.length],
+      index: index + 1,
     })),
     allPosts: posts,
     morePosts: posts.length > (site.homeBlogCount || 5),
@@ -251,12 +260,16 @@ function build() {
 
   // 7c. blog list and tag pages share list.html
   const listTpl = tpl('list.html');
-  const list = (rel, ctx, meta) => writeFile(rel, page(listTpl, ctx, meta));
+  const list = (rel, ctx, meta) => writeFile(rel, page(listTpl, { ...ctx,
+    archiveHtml: render(tpl('archive.html'), { icons, ...ctx, postCount: ctx.allPosts.length }),
+  }, meta));
 
   list('blog/index.html', {
-    listTitle: '博客',
+    tagFilters,
+    allTags: true,
+    listTitle: '所有想法，都在这里。',
+    allPosts: posts,
     listSubtitle: `共 ${posts.length} 篇`,
-    groups: groupByYear(posts),
   }, {
     pageTitle: `博客 · ${site.title}`,
     metaDescription: `${site.title} 的全部文章`,
@@ -272,8 +285,9 @@ function build() {
     const tagged = posts.filter((post) => post.tagNames.includes(tag));
     list(`tags/${tag}/index.html`, {
       listTitle: `#${tag}`,
+      tagFilters: tagFilters.map((item) => ({ ...item, active: item.name === tag })),
       listSubtitle: `${tagged.length} 篇文章`,
-      groups: groupByYear(tagged),
+      allPosts: tagged,
     }, {
       pageTitle: `#${tag} · ${site.title}`,
       metaDescription: `标签 ${tag} 下的文章`,
@@ -300,6 +314,7 @@ function build() {
   writeFile('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${site.baseURL}/sitemap.xml\n`);
   if (fs.existsSync(p('static'))) copyDir(p('static'), DIST);
   if (fs.existsSync(p('assets'))) copyDir(p('assets'), p('dist', 'assets'));
+  copyDir(p('node_modules/katex/dist'), p('dist/vendor/katex'));
 
   // 8. summary
   const singles = [...tagCounts.entries()].filter(([, n]) => n === 1).map(([t]) => t);
